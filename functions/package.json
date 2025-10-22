@@ -1,0 +1,17 @@
+{
+  "name": "job-preview-function",
+  "version": "1.0.0",
+  "description": "Secure Firebase function for job listing preview",
+  "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-functions": "^4.6.0",
+    "firebase-admin": "^12.0.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}
