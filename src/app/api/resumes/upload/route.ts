@@ -1,87 +1,63 @@
-/**
- * API Route: /api/resumes/upload
- * Accepts multipart/form-data with "files" field containing PDF/DOCX/TXT files
- * Extracts plain text server-side and saves to data/resume_texts.json
- * 
- * Runtime: Node.js (required for pdf-parse and mammoth)
- * No env vars needed for basic operation
- */
-import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import pdfParse from 'pdf-parse'
-import mammoth from 'mammoth'
+import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
+import { getDatabase } from '@/lib/database';
+import { parseResumeFile, parseResumeData } from '@/lib/resume-parser';
+import { calculateATSScore } from '@/lib/ats-scorer';
 
-export const runtime = 'nodejs'
-
-const DATA_DIR = path.join(process.cwd(), 'data')
-const RESUME_TEXTS_FILE = path.join(DATA_DIR, 'resume_texts.json')
-
-async function extractTextFromFile(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const fileName = file.name.toLowerCase()
-
+export async function POST(request: NextRequest) {
   try {
-    if (fileName.endsWith('.pdf')) {
-      const data = await pdfParse(buffer)
-      return data.text
-    } else if (fileName.endsWith('.docx')) {
-      const result = await mammoth.extractRawText({ buffer })
-      return result.value
-    } else if (fileName.endsWith('.txt')) {
-      return buffer.toString('utf-8')
-    } else {
-      throw new Error(`Unsupported file type: ${fileName}`)
-    }
-  } catch (error) {
-    console.error(`Error extracting text from ${fileName}:`, error)
-    throw error
-  }
-}
+    const user = await getCurrentUser();
 
-export async function POST(req: NextRequest) {
-  try {
-    const formData = await req.formData()
-    const files = formData.getAll('files') as File[]
-
-    if (files.length === 0) {
-      return NextResponse.json({ error: 'No files provided' }, { status: 400 })
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      );
     }
 
-    // Extract text from all files
-    const extractedTexts: string[] = []
-    for (const file of files) {
-      const text = await extractTextFromFile(file)
-      extractedTexts.push(text)
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
     }
 
-    // Ensure data directory exists
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true })
-    }
+    // Parse resume
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const text = await parseResumeFile(buffer, file.name);
+    const parsedData = parseResumeData(text);
 
-    // Load existing texts if any
-    let allTexts: string[] = []
-    if (fs.existsSync(RESUME_TEXTS_FILE)) {
-      const existing = JSON.parse(fs.readFileSync(RESUME_TEXTS_FILE, 'utf-8'))
-      allTexts = existing.texts || []
-    }
+    // Calculate ATS score
+    const atsScore = calculateATSScore(text, parsedData);
 
-    // Append new texts
-    allTexts.push(...extractedTexts)
+    // Save to database
+    const db = getDatabase();
+    const stmt = db.prepare(`
+      INSERT INTO resumes (user_id, filename, content, parsed_data, ats_score)
+      VALUES (?, ?, ?, ?, ?)
+    `);
 
-    // Save to file
-    fs.writeFileSync(
-      RESUME_TEXTS_FILE,
-      JSON.stringify({ texts: allTexts, updatedAt: new Date().toISOString() }, null, 2)
-    )
+    const result = stmt.run(
+      user.id,
+      file.name,
+      text,
+      JSON.stringify(parsedData),
+      atsScore.overall
+    );
 
-    return NextResponse.json({ ok: true, count: extractedTexts.length })
-  } catch (error) {
-    console.error('Upload error:', error)
+    return NextResponse.json({
+      success: true,
+      resumeId: result.lastInsertRowid,
+      atsScore,
+      parsedData
+    });
+  } catch (error: any) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Upload failed' },
+      { error: error.message || 'Failed to upload resume' },
       { status: 500 }
-    )
+    );
   }
 }

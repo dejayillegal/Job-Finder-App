@@ -1,14 +1,12 @@
-/**
- * Root Layout Component
- * Wraps the entire app with ResumesProvider for global state management
- */
-import React from 'react'
-import { ResumesProvider } from '@/contexts/ResumesContext'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
-export const metadata = {
-  title: 'Job Finder - QA/Test Role Assistant',
-  description: 'Find relevant QA and Test Engineering roles based on your resume',
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'Job Finder Pro - AI-Powered Career Platform',
+  description: 'Optimize your resume, find perfect matches, and automate applications',
 }
 
 export default function RootLayout({
@@ -18,11 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <ResumesProvider>
-          {children}
-        </ResumesProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
