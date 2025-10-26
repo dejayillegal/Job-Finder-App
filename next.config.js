@@ -1,11 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Required for GitHub Pages
-  images: {
-    unoptimized: true, // Disable Next.js image optimization for static export
-  },
-  basePath: '/Job-Finder-App', // 👈 your repo name here
+  output: 'export',
+  images: { unoptimized: true },
+  basePath: '/Job-Finder-App',
   assetPrefix: '/Job-Finder-App/',
+  trailingSlash: true,
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push({ 'better-sqlite3': 'commonjs better-sqlite3' });
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;
