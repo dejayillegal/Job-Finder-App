@@ -1,6 +1,6 @@
 {
-  "name": "job-finder-pro-resume-driven",
-  "version": "3.0.0",
+  "name": "job-finder-pro-v4",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -24,7 +24,6 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "tailwind-merge": "^2.5.4",
-    "cheerio": "^1.0.0",
     "axios": "^1.7.7"
   },
   "devDependencies": {
