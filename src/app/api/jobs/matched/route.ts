@@ -11,12 +11,13 @@ export async function GET(request: NextRequest) {
     }
 
     const db = getDatabase();
-    const jobs = db.prepare(\`
+    // FIXED: Use regular quotes instead of template literals
+    const jobs = db.prepare(`
       SELECT * FROM jobs 
       WHERE user_id = ? 
       ORDER BY match_score DESC, scraped_at DESC
       LIMIT 50
-    \`).all(parseInt(userId));
+    `).all(parseInt(userId));
 
     const processed = jobs.map((job: any) => ({
       ...job,
