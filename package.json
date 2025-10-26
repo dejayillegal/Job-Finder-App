@@ -1,38 +1,21 @@
 {
-  "name": "job-finder-pro-v4",
-  "version": "4.0.0",
+  "name": "jobfinder-revolutionary",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "export": "next export",
+    "build": "next build", 
     "start": "next start",
-    "db:init": "node scripts/init-db.js",
-    "deploy": "npm run build && npm run export"
+    "lint": "next lint"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^11.3.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.454.0",
-    "mammoth": "^1.8.0",
     "next": "15.0.3",
-    "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-dropzone": "^14.2.3",
-    "tailwind-merge": "^2.5.4",
-    "axios": "^1.7.7"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/better-sqlite3": "^7.6.11",
-    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.8.6",
-    "@types/pdf-parse": "^1.1.4",
-    "@types/react": "^18.3.12",
+    "@types/react": "^18.3.12", 
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.15.0",
