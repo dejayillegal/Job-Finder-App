@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
 
     // Save resume to database
     const db = getDatabase();
-    const result = db.prepare(\`
+    // FIXED: Use regular quotes instead of template literals
+    const result = db.prepare(`
       INSERT INTO resumes (user_id, filename, content, parsed_data, skills, experience_years, current_role)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    \`).run(
+    `).run(
       userId,
       file.name,
       parsed.rawText,
