@@ -6,8 +6,19 @@ let db: Database.Database | null = null;
 export function getDatabase(): Database.Database {
   if (!db) {
     const dbPath = path.join(process.cwd(), 'data', 'database.db');
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
+    try {
+      db = new Database(dbPath);
+      db.pragma('journal_mode = WAL');
+    } catch (error) {
+      throw new Error(`Failed to connect to database. Run: npm run db:init`);
+    }
   }
   return db;
+}
+
+export function closeDatabase(): void {
+  if (db) {
+    db.close();
+    db = null;
+  }
 }
