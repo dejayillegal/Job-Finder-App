@@ -1,10 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push({ 'better-sqlite3': 'commonjs better-sqlite3' });
-    }
-    return config;
+  output: 'export',
+  images: {
+    unoptimized: true,
   },
 };
+
 module.exports = nextConfig;
